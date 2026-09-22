@@ -26,7 +26,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
         }
 
         body {
@@ -43,6 +43,33 @@
             max-width: 800px;
             padding: 20px;
             flex: 1;
+        }
+
+        /* شريط التبديل العلوي */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .lang-switch-btn {
+            background-color: #ffffff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .lang-switch-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         /* الهيدر */
@@ -138,8 +165,8 @@
             font-size: 1.4rem;
             margin-bottom: 15px;
             font-weight: 700;
-            border-right: 4px solid var(--primary-color);
-            padding-right: 8px;
+            border-inline-start: 4px solid var(--primary-color);
+            padding-inline-start: 8px;
         }
 
         .dedications-list {
@@ -152,7 +179,7 @@
             background: var(--card-bg);
             border-radius: 12px;
             padding: 18px 20px;
-            border-right: 5px solid var(--accent);
+            border-inline-start: 5px solid var(--accent);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
             animation: fadeIn 0.3s ease-in;
         }
@@ -210,34 +237,41 @@
 <body>
 
     <div class="container">
+        <!-- زر التبديل بين اللغتين -->
+        <div class="top-bar">
+            <button id="langToggleBtn" class="lang-switch-btn" onclick="toggleLanguage()">
+                🌐 English
+            </button>
+        </div>
+
         <!-- الهيدر باسم المستشفى ورسالته -->
         <header>
-            <h1>مستشفى بدية</h1>
-            <div class="quote">
+            <h1 id="hospitalTitle">مستشفى بدية</h1>
+            <div class="quote" id="headerQuote">
                 "في اليوم العالمي للصيدلة، نُثمّن جهود ملائكة الدواء وصُنّاع الشفاء.. شكراً لعطائكم المستمر ودقتكم التي تحمي أرواحنا." 💊✨
             </div>
         </header>
 
         <!-- نموذج الإرسال -->
         <section class="card">
-            <h2>✍️ اكتب عبارة اهداء للصيدلاني</h2>
+            <h2 id="formTitle">✍️ اكتب عبارة اهداء للصيدلاني</h2>
             <form id="dedicationForm">
                 <div class="form-group">
-                    <label for="senderName">اسم صاحب الإهداء:</label>
+                    <label for="senderName" id="labelSenderName">اسم صاحب الإهداء:</label>
                     <input type="text" id="senderName" placeholder="أدخل اسمك الكريم" required>
                 </div>
                 <div class="form-group">
-                    <label for="dedicationMessage">عبارة الإهداء:</label>
+                    <label for="dedicationMessage" id="labelMessage">عبارة الإهداء:</label>
                     <textarea id="dedicationMessage" rows="3" placeholder="اكتب كلمتك الطيبة وإهدائك للصيدلاني هنا..." required></textarea>
                 </div>
-                <button type="submit" class="btn-submit">إرسال الإهداء ❤️</button>
+                <button type="submit" class="btn-submit" id="btnSubmit">إرسال الإهداء ❤️</button>
             </form>
         </section>
 
         <!-- قائمة الإهداءات الحية -->
-        <h3 class="section-title">سجل الإهداءات المقدمة</h3>
+        <h3 class="section-title" id="sectionTitle">سجل الإهداءات المقدمة</h3>
         <div id="dedicationsList" class="dedications-list">
-            <div class="empty-state">جاري تحميل الإهداءات...</div>
+            <div class="empty-state" id="emptyStateText">جاري تحميل الإهداءات...</div>
         </div>
     </div>
 
@@ -247,6 +281,81 @@
     </footer>
 
     <script>
+        // إعدادات ترجمة اللغة
+        const translations = {
+            ar: {
+                dir: "rtl",
+                langBtn: "🌐 English",
+                hospitalTitle: "مستشفى بدية",
+                headerQuote: `"في اليوم العالمي للصيدلة، نُثمّن جهود ملائكة الدواء وصُنّاع الشفاء.. شكراً لعطائكم المستمر ودقتكم التي تحمي أرواحنا." 💊✨`,
+                formTitle: "✍️ اكتب عبارة اهداء للصيدلاني",
+                labelSenderName: "اسم صاحب الإهداء:",
+                phSenderName: "أدخل اسمك الكريم",
+                labelMessage: "عبارة الإهداء:",
+                phMessage: "اكتب كلمتك الطيبة وإهدائك للصيدلاني هنا...",
+                btnSubmit: "إرسال الإهداء ❤️",
+                sectionTitle: "سجل الإهداءات المقدمة",
+                emptyLoading: "جاري تحميل الإهداءات...",
+                emptyNone: "لا توجد إهداءات مكتوبة بعد. كن أول من يكتب إهداءً!",
+                emptyError: "خطأ في الاتصال بقاعدة البيانات.",
+                alertError: "حدث خطأ أثناء إرسال الإهداء: "
+            },
+            en: {
+                dir: "ltr",
+                langBtn: "🌐 العربية",
+                hospitalTitle: "Bidyah Hospital",
+                headerQuote: `"On World Pharmacists Day, we honor the angels of medicine and healers of health.. Thank you for your dedication and precision that safeguard our lives." 💊✨`,
+                formTitle: "✍️ Write a Dedication Message to the Pharmacist",
+                labelSenderName: "Sender's Name:",
+                phSenderName: "Enter your full name",
+                labelMessage: "Dedication Message:",
+                phMessage: "Write your kind words and appreciation here...",
+                btnSubmit: "Send Dedication ❤️",
+                sectionTitle: "Submitted Dedications Log",
+                emptyLoading: "Loading dedications...",
+                emptyNone: "No dedications written yet. Be the first to send one!",
+                emptyError: "Error connecting to the database.",
+                alertError: "An error occurred while sending the dedication: "
+            }
+        };
+
+        let currentLang = 'ar';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            applyLanguage(currentLang);
+        }
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            
+            // تغيير اتجاه الصفحة
+            document.documentElement.setAttribute('dir', t.dir);
+            document.documentElement.setAttribute('lang', lang);
+
+            // تحديث النصوص
+            document.getElementById('langToggleBtn').innerText = t.langBtn;
+            document.getElementById('hospitalTitle').innerText = t.hospitalTitle;
+            document.getElementById('headerQuote').innerText = t.headerQuote;
+            document.getElementById('formTitle').innerText = t.formTitle;
+            document.getElementById('labelSenderName').innerText = t.labelSenderName;
+            document.getElementById('senderName').placeholder = t.phSenderName;
+            document.getElementById('labelMessage').innerText = t.labelMessage;
+            document.getElementById('dedicationMessage').placeholder = t.phMessage;
+            document.getElementById('btnSubmit').innerText = t.btnSubmit;
+            document.getElementById('sectionTitle').innerText = t.sectionTitle;
+
+            // تحديث حالة القائمة الفارغة إن كانت معروضة
+            const emptyEl = document.querySelector('.empty-state');
+            if (emptyEl) {
+                if (hasDedications === false) {
+                    emptyEl.innerText = t.emptyNone;
+                } else if (hasDedications === null) {
+                    emptyEl.innerText = t.emptyLoading;
+                }
+            }
+        }
+
         // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
           apiKey: "AIzaSyB1u84k9XlNe9sFNGEzf2f2srYQvJYTuOg",
@@ -265,6 +374,7 @@
 
         const form = document.getElementById('dedicationForm');
         const dedicationsList = document.getElementById('dedicationsList');
+        let hasDedications = null;
 
         // حفظ الإهداء الجديد
         form.addEventListener('submit', function(e) {
@@ -272,7 +382,8 @@
             
             const name = document.getElementById('senderName').value.trim();
             const message = document.getElementById('dedicationMessage').value.trim();
-            const dateStr = new Date().toLocaleString('ar-OM', { dateStyle: 'medium', timeStyle: 'short' });
+            const dateLocale = currentLang === 'ar' ? 'ar-OM' : 'en-US';
+            const dateStr = new Date().toLocaleString(dateLocale, { dateStyle: 'medium', timeStyle: 'short' });
 
             if (!name || !message) return;
 
@@ -284,7 +395,7 @@
             }).then(() => {
                 form.reset();
             }).catch((error) => {
-                alert("حدث خطأ أثناء إرسال الإهداء: " + error.message);
+                alert(translations[currentLang].alertError + error.message);
             });
         });
 
@@ -293,16 +404,18 @@
             dedicationsList.innerHTML = '';
             
             if (snapshot.empty) {
-                dedicationsList.innerHTML = '<div class="empty-state">لا توجد إهداءات مكتوبة بعد. كن أول من يكتب إهداءً!</div>';
+                hasDedications = false;
+                dedicationsList.innerHTML = `<div class="empty-state">${translations[currentLang].emptyNone}</div>`;
                 return;
             }
 
+            hasDedications = true;
             snapshot.forEach((doc) => {
                 const item = doc.data();
                 dedicationsList.appendChild(createDedicationCard(item));
             });
         }, (error) => {
-            dedicationsList.innerHTML = '<div class="empty-state">خطأ في الاتصال بقاعدة البيانات.</div>';
+            dedicationsList.innerHTML = `<div class="empty-state">${translations[currentLang].emptyError}</div>`;
         });
 
         function createDedicationCard(item) {
@@ -325,4 +438,3 @@
     </script>
 </body>
 </html>
-
