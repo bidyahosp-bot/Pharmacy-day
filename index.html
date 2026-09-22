@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اليوم العالمي للصيدلة - مستشفى بدية</title>
+    <!-- خط تجوال -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات Firebase الخاصة بـ Cloud Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #0f766e;
+            --primary-hover: #0d9488;
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #14b8a6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* الهيدر */
+        header {
+            text-align: center;
+            background: linear-gradient(135deg, #0f766e, #115e59);
+            color: white;
+            padding: 35px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(15, 118, 110, 0.15);
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        header .quote {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.7;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        /* البطاقات والنماذج */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* قائمة الإهداءات */
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            border-right: 4px solid var(--primary-color);
+            padding-right: 8px;
+        }
+
+        .dedications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dedication-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 18px 20px;
+            border-right: 5px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .dedication-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .sender-name {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .dedication-text {
+            color: #334155;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            background: white;
+            border-radius: 12px;
+        }
+
+        /* التذييل */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 30px;
+            background: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- الهيدر باسم المستشفى ورسالته -->
+        <header>
+            <h1>مستشفى بدية</h1>
+            <div class="quote">
+                "في اليوم العالمي للصيدلة، نُثمّن جهود ملائكة الدواء وصُنّاع الشفاء.. شكراً لعطائكم المستمر ودقتكم التي تحمي أرواحنا." 💊✨
+            </div>
+        </header>
+
+        <!-- نموذج الإرسال -->
+        <section class="card">
+            <h2>✍️ اكتب عبارة اهداء للصيدلاني</h2>
+            <form id="dedicationForm">
+                <div class="form-group">
+                    <label for="senderName">اسم صاحب الإهداء:</label>
+                    <input type="text" id="senderName" placeholder="أدخل اسمك الكريم" required>
+                </div>
+                <div class="form-group">
+                    <label for="dedicationMessage">عبارة الإهداء:</label>
+                    <textarea id="dedicationMessage" rows="3" placeholder="اكتب كلمتك الطيبة وإهدائك للصيدلاني هنا..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">إرسال الإهداء ❤️</button>
+            </form>
+        </section>
+
+        <!-- قائمة الإهداءات الحية -->
+        <h3 class="section-title">سجل الإهداءات المقدمة</h3>
+        <div id="dedicationsList" class="dedications-list">
+            <div class="empty-state">جاري تحميل الإهداءات...</div>
+        </div>
+    </div>
+
+    <!-- التذييل المطلوب -->
+    <footer>
+        by:JOUHARAH.IT
+    </footer>
+
+    <script>
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+          apiKey: "AIzaSyB1u84k9XlNe9sFNGEzf2f2srYQvJYTuOg",
+          authDomain: "pharmacy-443cf.firebaseapp.com",
+          databaseURL: "https://pharmacy-443cf-default-rtdb.firebaseio.com",
+          projectId: "pharmacy-443cf",
+          storageBucket: "pharmacy-443cf.firebasestorage.app",
+          messagingSenderId: "712561665386",
+          appId: "1:712561665386:web:1492f31d36d246643b7113",
+          measurementId: "G-NH9NXLFS1Q"
+        };
+
+        // تهيئة التطبيق وقاعدة البيانات
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const form = document.getElementById('dedicationForm');
+        const dedicationsList = document.getElementById('dedicationsList');
+
+        // حفظ الإهداء الجديد
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('senderName').value.trim();
+            const message = document.getElementById('dedicationMessage').value.trim();
+            const dateStr = new Date().toLocaleString('ar-OM', { dateStyle: 'medium', timeStyle: 'short' });
+
+            if (!name || !message) return;
+
+            db.collection('dedications').add({
+                name: name,
+                message: message,
+                timestamp: dateStr,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                form.reset();
+            }).catch((error) => {
+                alert("حدث خطأ أثناء إرسال الإهداء: " + error.message);
+            });
+        });
+
+        // مزامنة واستقبال الإهداءات فورياً على كافة الأجهزة
+        db.collection('dedications').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+            dedicationsList.innerHTML = '';
+            
+            if (snapshot.empty) {
+                dedicationsList.innerHTML = '<div class="empty-state">لا توجد إهداءات مكتوبة بعد. كن أول من يكتب إهداءً!</div>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                dedicationsList.appendChild(createDedicationCard(item));
+            });
+        }, (error) => {
+            dedicationsList.innerHTML = '<div class="empty-state">خطأ في الاتصال بقاعدة البيانات.</div>';
+        });
+
+        function createDedicationCard(item) {
+            const card = document.createElement('div');
+            card.className = 'dedication-item';
+            
+            card.innerHTML = `
+                <div class="dedication-header">
+                    <span class="sender-name">${escapeHtml(item.name || '')}</span>
+                    <span class="timestamp">${item.timestamp || ''}</span>
+                </div>
+                <div class="dedication-text">${escapeHtml(item.message || '')}</div>
+            `;
+            return card;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
+
